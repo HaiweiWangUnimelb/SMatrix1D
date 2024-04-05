@@ -70,8 +70,8 @@ def calculateRT(device, wl, theta, phi, p_TE, p_TM, er_ref, er_trn, ur_ref=1, ur
     else:
         c_ref = S_global[0] @ c_inc + 0j
         c_trn = S_global[2] @ c_inc + 0j
-        k_z_ref = -np.sqrt(er_ref*ur_ref - k_x**2 - k_y**2 + 0j)
-        k_z_trn = np.sqrt(er_trn*ur_trn - k_x**2 - k_y**2 + 0j)
+        k_z_ref = -np.emath.sqrt(er_ref*ur_ref - k_x**2 - k_y**2 + 0j)
+        k_z_trn = np.emath.sqrt(er_trn*ur_trn - k_x**2 - k_y**2 + 0j)
 
         E_z_ref = -(k_x * c_ref[0] + k_y * c_ref[1]) / k_z_ref
         R = np.abs(c_ref[0])**2 + np.abs(c_ref[1])**2 + np.abs(E_z_ref)**2
@@ -125,17 +125,17 @@ def computeSMatrixUniform(k_x, k_y, er, ur, k_0, L):
     '''
     I = np.identity(2)
     
-    k_z_0 = np.sqrt(1-k_x**2-k_y**2)
+    k_z_0 = np.emath.sqrt(1-k_x**2-k_y**2)
     Q_0 = np.array([[k_x*k_y, 1 - k_x**2], [k_y**2-1, -k_x*k_y]])
     omega_0_inv = -1j/k_z_0*I
     V_0 = Q_0 @ omega_0_inv
 
-    k_z_i = np.sqrt(ur*er-k_x**2-k_y**2)
+    k_z_i = np.emath.sqrt(ur*er-k_x**2-k_y**2)
     Q_i = 1/ur * np.array([[k_x*k_y, ur*er - k_x**2], [k_y**2-ur*er, -k_x*k_y]])
     omega_i_inv = -1j/k_z_i*I
     V_i = Q_i @ omega_i_inv
     V_i_inv = np.linalg.inv(V_i)
-    X = np.array([[np.exp(1j*k_z_i*k_0*L), 0], [0, np.exp(-1j*k_z_i*k_0*L)]])
+    X = np.array([[np.exp(-1j*k_z_i*k_0*L), 0], [0, np.exp(-1j*k_z_i*k_0*L)]])
     
     A = I + V_i_inv @ V_0
     A_inv = np.linalg.inv(A) 
@@ -159,19 +159,19 @@ def computeGlobalSMatrix(k_x, k_y, er_ref, ur_ref, er_trn, ur_trn, S_device):
     Outputs:
         S_global: the global scattering matrix
     '''
-    I = np.identity(2)
+    I = np.conjugate(np.identity(2))
 
-    k_z_0 = np.sqrt(1-k_x**2-k_y**2+0j)
+    k_z_0 = np.emath.sqrt(1-k_x**2-k_y**2+0j)
     Q_0 = np.array([[k_x*k_y, 1 - k_x**2], [k_y**2-1, -k_x*k_y]])
     omega_0_inv = -1j/k_z_0*I
     V_0_inv = np.linalg.inv(Q_0 @ omega_0_inv)
 
-    k_z_trn = np.sqrt(ur_trn*er_trn-k_x**2-k_y**2+0j)
+    k_z_trn = np.emath.sqrt(ur_trn*er_trn-k_x**2-k_y**2)
     Q_trn = 1/ur_trn * np.array([[k_x*k_y, ur_trn*er_trn - k_x**2], [k_y**2-ur_trn*er_trn, -k_x*k_y]])
     omega_trn_inv = -1j/k_z_trn*I
     V_trn = Q_trn @ omega_trn_inv
     
-    k_z_ref = np.sqrt(ur_ref*er_ref-k_x**2-k_y**2+0j)
+    k_z_ref = np.emath.sqrt(ur_ref*er_ref-k_x**2-k_y**2)
     Q_ref = 1/ur_ref * np.array([[k_x*k_y, ur_ref*er_ref - k_x**2], [k_y**2-ur_ref*er_ref, -k_x*k_y]])
     omega_ref_inv = -1j/k_z_ref*I
     V_ref = Q_ref @ omega_ref_inv
